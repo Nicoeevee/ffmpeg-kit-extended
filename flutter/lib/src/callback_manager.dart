@@ -50,6 +50,7 @@ typedef FFmpegKitStatisticsCallbackFunction =
       FFmpegSessionHandle,
       Int64,
       Int64,
+      Int64,
       Double,
       Double,
       Int64,
@@ -156,6 +157,7 @@ void _onFFmpegLog(
 /// Handles statistics from an FFmpeg session.
 void _onFFmpegStatistics(
   FFmpegSessionHandle sessionHandle,
+  int timeElapsed,
   int time,
   int size,
   double bitrate,
@@ -170,6 +172,7 @@ void _onFFmpegStatistics(
 
   final stats = Statistics(
     sessionId,
+    timeElapsed,
     time,
     size,
     bitrate,

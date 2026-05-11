@@ -177,6 +177,17 @@ external void ffmpeg_kit_close_session(FFmpegSessionHandle handle);
 @ffi.Native<ffi.Void Function()>()
 external void ffmpeg_kit_debug_print_stack();
 
+/// Emits a synthetic unattributed log through the shared FFmpeg log callback.
+///
+/// Test-only helper used by wrapper regression tests to verify that callbacks
+/// routed to session `0` do not interfere with real session completion.
+///
+/// @param message the message to emit
+@ffi.Native<ffi.Void Function(ffi.Pointer<ffi.Char>)>()
+external void ffmpeg_kit_test_emit_unattributed_log(
+  ffi.Pointer<ffi.Char> message,
+);
+
 /// Sets the log callback for all FFmpeg sessions.
 ///
 /// @param log_cb the callback to be called when a log is generated
@@ -265,6 +276,12 @@ external void ffmpeg_kit_session_execute(FFmpegSessionHandle session);
 /// @param session the FFmpeg session to execute
 @ffi.Native<ffi.Void Function(FFmpegSessionHandle)>()
 external void ffmpeg_kit_session_execute_async(FFmpegSessionHandle session);
+
+/// Cancels the FFmpeg session.
+///
+/// @param session the FFmpeg session to cancel
+@ffi.Native<ffi.Void Function(FFmpegSessionHandle)>()
+external void ffmpeg_kit_session_cancel(FFmpegSessionHandle session);
 
 /// Executes the given FFprobe command.
 ///
@@ -2010,6 +2027,14 @@ external int ffmpeg_kit_statistics_get_size(StatisticsHandle handle);
 @ffi.Native<ffi.Double Function(StatisticsHandle)>()
 external double ffmpeg_kit_statistics_get_time(StatisticsHandle handle);
 
+/// Gets the time elapsed in milliseconds.
+///
+/// @param handle the statistics handle
+/// @return the time elapsed in milliseconds (consistent with the time argument passed
+/// to FFmpegKitStatisticsCallback)
+@ffi.Native<ffi.Double Function(StatisticsHandle)>()
+external double ffmpeg_kit_statistics_get_time_elapsed(StatisticsHandle handle);
+
 /// Gets the bitrate.
 ///
 /// @param handle the statistics handle
@@ -2334,6 +2359,7 @@ typedef FFmpegKitLogCallback =
 typedef FFmpegKitStatisticsCallbackFunction =
     ffi.Void Function(
       FFmpegSessionHandle session,
+      ffi.Int64 time_elapsed,
       ffi.Int64 time,
       ffi.Int64 size,
       ffi.Double bitrate,
@@ -2346,6 +2372,7 @@ typedef FFmpegKitStatisticsCallbackFunction =
 typedef DartFFmpegKitStatisticsCallbackFunction =
     void Function(
       FFmpegSessionHandle session,
+      int time_elapsed,
       int time,
       int size,
       double bitrate,

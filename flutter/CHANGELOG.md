@@ -1,5 +1,12 @@
 # FFmpegKit Extended Flutter Plugin CHANGELOG
 
+## Version 0.5.0
+
+- Added `timeElapsed` field to `Statistics` class for enhanced timing information
+- Updated statistics callback signatures to include elapsed time parameter
+- Added `ffmpeg_kit_statistics_get_time_elapsed` native binding
+- Enhanced test callbacks to support new timeElapsed parameter
+
 ## Version 0.4.4
 
 - Fix build hook to skip SHA verification when override path is provided.
