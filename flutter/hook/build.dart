@@ -156,14 +156,16 @@ Future<FFmpegArtifact?> _resolveArtifact(
 
   if (overrideUrl != null) {
     if (_isUri(overrideUrl)) {
+      _log('Using remote override URL: $overrideUrl');
       url = overrideUrl;
       filename = p.basename(Uri.parse(url).path);
-      return _handleDownloadedFile(
-        File(p.join(cacheDir.path, filename)),
-        cacheDir,
-        input,
-      );
+      final targetFile = File(p.join(cacheDir.path, filename));
+      if (!await _downloadFile(url, targetFile)) {
+        throw _exception('Failed to download $url');
+      }
+      return await _handleDownloadedFile(targetFile, cacheDir, input);
     } else {
+      _log('Using local override path: $overrideUrl');
       final localFile = p.isAbsolute(overrideUrl)
           ? File(overrideUrl)
           : File(p.join(configResult.baseDir, overrideUrl));
@@ -175,7 +177,7 @@ Future<FFmpegArtifact?> _resolveArtifact(
             cacheFile.lengthSync() != localFile.lengthSync()) {
           localFile.copySync(cacheFile.path);
         }
-        return _handleDownloadedFile(cacheFile, cacheDir, input);
+        return await _handleDownloadedFile(cacheFile, cacheDir, input);
       }
       throw _exception(
         'Local override not found: $overrideUrl (resolved from ${configResult.baseDir})',
