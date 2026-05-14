@@ -1,5 +1,9 @@
 # FFmpegKit Extended Flutter Plugin CHANGELOG
 
+## Version 0.4.6
+
+- Fix binary version
+
 ## Version 0.4.5
 
 - Fix build hook to correctly download remote files from URL.
