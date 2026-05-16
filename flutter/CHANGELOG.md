@@ -15,7 +15,7 @@
 - Extended `FFprobeSession` and `FFplaySession` with session-level log callbacks and wired `FFprobeKit` / `FFplayKit` convenience APIs to accept `onLog`.
 - Unified log draining across FFmpeg, FFprobe, FFplay, and MediaInformation sessions through the shared Dart callback manager while preserving the existing native buffering model.
 - Reduced example-app UI stalls during remote recording scenarios by batching log rendering and file writes, throttling stats-driven repainting, and avoiding high-volume debug log mirroring into the visible console.
-
+- Fix Windows and Android stability issues.
 
 ## Version 0.4.4
 
