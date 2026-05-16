@@ -1704,7 +1704,7 @@ external FFmpegSessionHandle ffmpeg_kit_get_last_completed_session();
 
 /// Gets the session history size.
 ///
-/// @return the session history size
+/// @return the session history size, should be smaller than 1000
 @ffi.Native<ffi.Int64 Function()>()
 external int ffmpeg_kit_get_session_history_size();
 
@@ -2049,17 +2049,11 @@ external double ffmpeg_kit_statistics_get_bitrate(StatisticsHandle handle);
 @ffi.Native<ffi.Double Function(StatisticsHandle)>()
 external double ffmpeg_kit_statistics_get_speed(StatisticsHandle handle);
 
-/// Gets the duplicated frame count.
-///
-/// @param handle the statistics handle
-/// @return the duplicated frame count
+/// Returns the duplicated frame count from a statistics entry.
 @ffi.Native<ffi.Int64 Function(StatisticsHandle)>()
 external int ffmpeg_kit_statistics_get_dup_frames(StatisticsHandle handle);
 
-/// Gets the dropped frame count.
-///
-/// @param handle the statistics handle
-/// @return the dropped frame count
+/// Returns the dropped frame count from a statistics entry.
 @ffi.Native<ffi.Int64 Function(StatisticsHandle)>()
 external int ffmpeg_kit_statistics_get_drop_frames(StatisticsHandle handle);
 
@@ -2339,13 +2333,29 @@ typedef intmax_t = ffi.LongLong;
 typedef Dartintmax_t = int;
 typedef uintmax_t = ffi.UnsignedLongLong;
 typedef Dartuintmax_t = int;
+
+/// @brief Opaque FFmpeg session handle used to reference a specific FFmpeg session
 typedef FFmpegSessionHandle = ffi.Pointer<ffi.Void>;
+
+/// @brief Opaque FFprobe session handle used to reference a specific FFprobe session
 typedef FFprobeSessionHandle = ffi.Pointer<ffi.Void>;
+
+/// @brief Opaque FFplay session handle used to reference a specific FFplay session
 typedef FFplaySessionHandle = ffi.Pointer<ffi.Void>;
+
+/// @brief Opaque media information session handle used to reference a specific media information session
 typedef MediaInformationSessionHandle = ffi.Pointer<ffi.Void>;
+
+/// @brief Opaque media information handle used to reference a specific media information
 typedef MediaInformationHandle = ffi.Pointer<ffi.Void>;
+
+/// @brief Opaque stream information handle used to reference a specific stream information
 typedef StreamInformationHandle = ffi.Pointer<ffi.Void>;
+
+/// @brief Opaque chapter handle used to reference a specific chapter
 typedef ChapterHandle = ffi.Pointer<ffi.Void>;
+
+/// @brief Opaque statistics handle used to reference a specific statistics
 typedef StatisticsHandle = ffi.Pointer<ffi.Void>;
 typedef FFmpegKitCompleteCallbackFunction =
     ffi.Void Function(
@@ -2368,6 +2378,12 @@ typedef DartFFmpegKitLogCallbackFunction =
       ffi.Pointer<ffi.Char> log,
       ffi.Pointer<ffi.Void> user_data,
     );
+
+/// @brief Log callback function type
+///
+/// @param session The FFmpeg session handle
+/// @param log The log message
+/// @param user_data User data passed to the callback
 typedef FFmpegKitLogCallback =
     ffi.Pointer<ffi.NativeFunction<FFmpegKitLogCallbackFunction>>;
 typedef FFmpegKitStatisticsCallbackFunction =
@@ -2400,6 +2416,21 @@ typedef DartFFmpegKitStatisticsCallbackFunction =
       int dropFrames,
       ffi.Pointer<ffi.Void> user_data,
     );
+
+/// @brief Statistics callback function type
+///
+/// @param session The FFmpeg session handle
+/// @param time_elapsed Time elapsed in milliseconds
+/// @param time Time in milliseconds
+/// @param size Size in bytes
+/// @param bitrate Bitrate in kbps
+/// @param speed Speed in x
+/// @param videoFrameNumber Video frame number
+/// @param videoFps Video frame rate
+/// @param videoQuality Video quality
+/// @param dupFrames Duplicate frames
+/// @param dropFrames Dropped frames
+/// @param user_data User data passed to the callback
 typedef FFmpegKitStatisticsCallback =
     ffi.Pointer<ffi.NativeFunction<FFmpegKitStatisticsCallbackFunction>>;
 typedef FFprobeKitCompleteCallbackFunction =
@@ -2412,6 +2443,11 @@ typedef DartFFprobeKitCompleteCallbackFunction =
       FFprobeSessionHandle session,
       ffi.Pointer<ffi.Void> user_data,
     );
+
+/// @brief FFprobe complete callback function type
+///
+/// @param session The FFprobe session handle
+/// @param user_data User data passed to the callback
 typedef FFprobeKitCompleteCallback =
     ffi.Pointer<ffi.NativeFunction<FFprobeKitCompleteCallbackFunction>>;
 typedef FFplayKitCompleteCallbackFunction =
@@ -2421,6 +2457,11 @@ typedef FFplayKitCompleteCallbackFunction =
     );
 typedef DartFFplayKitCompleteCallbackFunction =
     void Function(FFplaySessionHandle session, ffi.Pointer<ffi.Void> user_data);
+
+/// @brief FFplay complete callback function type
+///
+/// @param session The FFplay session handle
+/// @param user_data User data passed to the callback
 typedef FFplayKitCompleteCallback =
     ffi.Pointer<ffi.NativeFunction<FFplayKitCompleteCallbackFunction>>;
 typedef MediaInformationSessionCompleteCallbackFunction =
@@ -2433,6 +2474,11 @@ typedef DartMediaInformationSessionCompleteCallbackFunction =
       MediaInformationSessionHandle session,
       ffi.Pointer<ffi.Void> user_data,
     );
+
+/// @brief Media information session complete callback function type
+///
+/// @param session The media information session handle
+/// @param user_data User data passed to the callback
 typedef MediaInformationSessionCompleteCallback =
     ffi.Pointer<
       ffi.NativeFunction<MediaInformationSessionCompleteCallbackFunction>
