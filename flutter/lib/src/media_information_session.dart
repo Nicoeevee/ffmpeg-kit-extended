@@ -23,6 +23,7 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'package:ffi/ffi.dart';
+import 'package:meta/meta.dart';
 
 import '../ffmpeg_kit_extended_flutter.dart';
 import 'callback_manager.dart';
@@ -39,8 +40,6 @@ class MediaInformationSession extends FFprobeSession {
   MediaInformationSessionCompleteCallback? _mediaInfoCompleteCallback;
 
   int _timeout;
-
-  bool _registered = false;
 
   // ---------------------------------------------------------------------------
   // Default ffprobe command fragments
@@ -77,10 +76,11 @@ class MediaInformationSession extends FFprobeSession {
     _ensureRegistered();
   }
 
-  /// Clears the completion callback and unregisters from [CallbackManager].
+  /// Clears the completion callback and unregisters from [CallbackManager]
+  /// if no other log-delivery sinks remain attached.
   void removeMediaInfoCompleteCallback() {
     _mediaInfoCompleteCallback = null;
-    _unregister();
+    _unregisterIfIdle();
   }
 
   /// Kept for API compatibility with callers that hold an [FFprobeSession]
@@ -154,8 +154,7 @@ class MediaInformationSession extends FFprobeSession {
     }
 
     _mediaInfoCompleteCallback = completeCallback;
-    CallbackManager().registerMediaInformationSession(this);
-    _registered = true;
+    ensureRegistered();
   }
 
   // ---------------------------------------------------------------------------
@@ -230,8 +229,7 @@ class MediaInformationSession extends FFprobeSession {
     }
 
     _mediaInfoCompleteCallback = completeCallback;
-    CallbackManager().registerMediaInformationSession(this);
-    _registered = true;
+    ensureRegistered();
   }
 
   /// Creates a [MediaInformationSession] for a network [uri].
@@ -280,8 +278,7 @@ class MediaInformationSession extends FFprobeSession {
     }
 
     _mediaInfoCompleteCallback = completeCallback;
-    CallbackManager().registerMediaInformationSession(this);
-    _registered = true;
+    ensureRegistered();
   }
 
   // ---------------------------------------------------------------------------
@@ -345,6 +342,7 @@ class MediaInformationSession extends FFprobeSession {
   MediaInformationSession execute() {
     SessionQueueManager()
         .executeSession(this, () async {
+          enableNativeLogCallback();
           try {
             ffmpeg.media_information_session_execute(handle, _timeout);
           } catch (e, st) {
@@ -355,6 +353,7 @@ class MediaInformationSession extends FFprobeSession {
             );
             rethrow;
           }
+          dispatchPendingLogs();
           try {
             _mediaInfoCompleteCallback?.call(this);
           } catch (e, st) {
@@ -365,6 +364,7 @@ class MediaInformationSession extends FFprobeSession {
             );
             rethrow;
           } finally {
+            closeLogStreams();
             _unregister();
           }
         })
@@ -599,9 +599,11 @@ class MediaInformationSession extends FFprobeSession {
     final userCb = _mediaInfoCompleteCallback;
 
     _mediaInfoCompleteCallback = (MediaInformationSession s) {
+      dispatchPendingLogs();
       // Restore and unregister before calling user code or completing the
       // future, so the session is fully settled from any observer's perspective.
       _mediaInfoCompleteCallback = userCb;
+      closeLogStreams();
       _unregister();
 
       try {
@@ -619,6 +621,8 @@ class MediaInformationSession extends FFprobeSession {
       // settled session.
       if (!sessionCompleter.isCompleted) sessionCompleter.complete();
     };
+
+    enableNativeLogCallback();
 
     // Register the global native callback for media information completion.
     try {
@@ -646,6 +650,7 @@ class MediaInformationSession extends FFprobeSession {
         error: e,
         stackTrace: st,
       );
+      closeLogStreams();
       _unregister();
       if (!sessionCompleter.isCompleted) sessionCompleter.complete();
       rethrow;
@@ -664,18 +669,37 @@ class MediaInformationSession extends FFprobeSession {
     // No post-await restore needed — already done inside the callback above.
   }
 
-  /// Ensures this session is registered with the callback manager.
-  void _ensureRegistered() {
-    if (_registered) return;
+  /// Routes registration through [CallbackManager.registerMediaInformationSession]
+  /// so the session lands in both the media-information and ffprobe maps.
+  ///
+  /// Overrides [FFprobeSession.ensureRegistered] to keep the inherited
+  /// `_registered` flag and both maps in sync.
+  @override
+  @protected
+  void ensureRegistered() {
+    if (isRegistered) return;
     CallbackManager().registerMediaInformationSession(this);
-    _registered = true;
+    markRegistered(true);
   }
 
-  /// Unregisters this session from the callback manager.
-  void _unregister() {
-    if (!_registered) return;
-    _registered = false;
+  /// Routes unregistration through
+  /// [CallbackManager.unregisterMediaInformationSession] so both maps are
+  /// cleaned regardless of which inherited path (log callback removal, complete
+  /// callback removal, async completion) triggered it.
+  @override
+  @protected
+  void unregister() {
+    if (!isRegistered) return;
+    markRegistered(false);
     CallbackManager().unregisterMediaInformationSession(sessionId);
+  }
+
+  /// Unregisters this session only if no complete callback or log-delivery
+  /// sink (log callback / batch stream listener) remains attached.
+  void _unregisterIfIdle() {
+    if (_mediaInfoCompleteCallback == null && !hasActiveLogDelivery) {
+      unregister();
+    }
   }
 
   /// Reads a heap-allocated C string into a Dart [String] and frees it.

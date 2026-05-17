@@ -22,6 +22,7 @@ import 'dart:developer';
 import 'dart:ffi';
 
 import 'package:ffi/ffi.dart';
+import 'package:meta/meta.dart';
 
 import '../ffmpeg_kit_extended_flutter.dart';
 import 'callback_manager.dart';
@@ -179,7 +180,7 @@ class FFprobeSession extends Session {
     SessionQueueManager()
         .executeSession(this, () async {
           FFmpegKitExtended.requireInitialized();
-          _enableNativeLogCallback();
+          enableNativeLogCallback();
           try {
             ffmpeg.ffprobe_kit_session_execute(handle);
           } catch (e, st) {
@@ -197,7 +198,7 @@ class FFprobeSession extends Session {
             log('FFprobeSession.execute: error in completeCallback: $e\n$st');
             rethrow;
           }
-          _closeLogStreams();
+          closeLogStreams();
           _unregister();
         })
         .catchError((Object e, StackTrace st) {
@@ -295,7 +296,7 @@ class FFprobeSession extends Session {
       // Restore and unregister before calling user code or completing the
       // future, so the session is fully settled from any observer's perspective.
       _completeCallback = userCompleteCallback;
-      _closeLogStreams();
+      closeLogStreams();
       _unregister();
 
       try {
@@ -311,7 +312,7 @@ class FFprobeSession extends Session {
       // settled session.
       if (!sessionCompleter.isCompleted) sessionCompleter.complete();
     };
-    _enableNativeLogCallback();
+    enableNativeLogCallback();
     try {
       ffmpeg.ffmpeg_kit_config_enable_ffprobe_session_complete_callback(
         nativeFFprobeComplete.nativeFunction,
@@ -334,7 +335,7 @@ class FFprobeSession extends Session {
         error: e,
         stackTrace: st,
       );
-      _closeLogStreams();
+      closeLogStreams();
       _unregister();
       if (!sessionCompleter.isCompleted) sessionCompleter.complete();
       rethrow;
@@ -350,10 +351,30 @@ class FFprobeSession extends Session {
   }
 
   /// Ensures this session is registered with the callback manager.
-  void _ensureRegistered() {
+  ///
+  /// Exposed as protected so subclasses (e.g. [MediaInformationSession]) can
+  /// route registration through the correct [CallbackManager] map.
+  @protected
+  void ensureRegistered() {
     if (_registered) return;
     CallbackManager().registerFFprobeSession(this);
     _registered = true;
+  }
+
+  /// Backwards-compatible alias used throughout this file.
+  void _ensureRegistered() => ensureRegistered();
+
+  /// Whether this session is currently registered with the [CallbackManager].
+  ///
+  /// Exposed as protected so subclasses can override [ensureRegistered] /
+  /// [unregister] while keeping a single source of truth for the flag.
+  @protected
+  bool get isRegistered => _registered;
+
+  /// Updates the registration flag from a subclass override.
+  @protected
+  void markRegistered(bool value) {
+    _registered = value;
   }
 
   @override
@@ -381,7 +402,13 @@ class FFprobeSession extends Session {
     }
   }
 
-  void _enableNativeLogCallback() {
+  /// Enables the native FFmpeg log callback for this session.
+  ///
+  /// Exposed as protected so that subclasses (e.g. [MediaInformationSession])
+  /// in other library files can wire log delivery into their own execution
+  /// paths.
+  @protected
+  void enableNativeLogCallback() {
     try {
       ffmpeg.ffmpeg_kit_config_enable_log_callback(
         nativeFFmpegLog.nativeFunction,
@@ -397,19 +424,41 @@ class FFprobeSession extends Session {
     }
   }
 
-  void _closeLogStreams() {
+  /// Closes any open log stream controllers for this session.
+  ///
+  /// Exposed as protected for subclass use.
+  @protected
+  void closeLogStreams() {
     final controller = _logBatchStreamController;
     if (controller != null && !controller.isClosed) {
       controller.close();
     }
   }
 
+  /// Returns `true` while any log-delivery sink (callback or batch stream
+  /// listener) is still attached to this session.
+  ///
+  /// Exposed as protected so subclasses that maintain their own complete
+  /// callback (e.g. [MediaInformationSession]) can implement an idle check
+  /// that considers inherited log-delivery state.
+  @protected
+  bool get hasActiveLogDelivery =>
+      _logCallback != null ||
+      (_logBatchStreamController?.hasListener ?? false);
+
   /// Unregisters this session from the callback manager.
-  void _unregister() {
+  ///
+  /// Exposed as protected so subclasses can route unregistration through the
+  /// correct [CallbackManager] map.
+  @protected
+  void unregister() {
     if (!_registered) return;
     _registered = false;
     CallbackManager().unregisterFFprobeSession(sessionId);
   }
+
+  /// Backwards-compatible alias used throughout this file.
+  void _unregister() => unregister();
 
   void _unregisterIfIdle() {
     if (_completeCallback == null &&
