@@ -133,14 +133,15 @@ jobs:
         working-directory: flutter/example
         run: flutter pub get --offline || true
 
-      - name: Build ${{ matrix.platform }}
-        working-directory: flutter/example
-        run: ${{ matrix.build_command }}
-
       - name: Unlock keychain
+        if: matrix.platform == 'ios' || matrix.platform == 'macos'
         run: |
           security unlock-keychain -p "${{ secrets.KEYCHAIN_PASSWORD }}" $HOME/Library/Keychains/login.keychain-db
           security set-keychain-settings -lut 21600 $HOME/Library/Keychains/login.keychain-db
+
+      - name: Build ${{ matrix.platform }}
+        working-directory: flutter/example
+        run: ${{ matrix.build_command }}
 
       - name: Upload artifacts
         if: matrix.platform == 'android'
