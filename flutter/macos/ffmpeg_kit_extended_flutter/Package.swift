@@ -13,15 +13,23 @@ let package = Package(
         )
     ],
     dependencies: [
+        .package(name: "FlutterFramework", path: "../FlutterFramework")
     ],
     targets: [
         // Objective-C Target - contains the actual plugin implementation
         .target(
             name: "ffmpeg_kit_native",
-            path: "Classes/ffmpeg_kit_native",
-            publicHeadersPath: "include",  // Critical: exposes headers to Swift/Flutter
+            path: ".",
+            sources: [
+                "Classes/ffmpeg_kit_native/FfmpegKitExtendedFlutterPlugin.m",
+                "Classes/ffmpeg_kit_native/FfplayKitPlugin.m"
+            ],
+            resources: [
+                .process("Resources/PrivacyInfo.xcprivacy")
+            ],
+            publicHeadersPath: "Classes/ffmpeg_kit_native/include",
             cSettings: [
-                .headerSearchPath("include")
+                .headerSearchPath("Classes/ffmpeg_kit_native/include")
             ],
             linkerSettings: [
                 // System frameworks required by FFmpeg
