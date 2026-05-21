@@ -4,14 +4,37 @@ on:
   push:
     branches:
       - main
-      - dev
     paths:
       - "flutter/example/**"
       - ".github/workflows/flutter_example_ci.yaml"
+      - "**.dart"
+      - "**.yaml"
+      - "**.yml"
+      - "**.gradle"
+      - "**.kt"
+      - "**.swift"
+      - "**.m"
+      - "**.h"
+      - "**.mm"
+      - "**.podspec"
+      - "!**.md"
+      - "!flutter/doc/**"
   pull_request:
     paths:
       - "flutter/example/**"
       - ".github/workflows/flutter_example_ci.yaml"
+      - "**.dart"
+      - "**.yaml"
+      - "**.yml"
+      - "**.gradle"
+      - "**.kt"
+      - "**.swift"
+      - "**.m"
+      - "**.h"
+      - "**.mm"
+      - "**.podspec"
+      - "!**.md"
+      - "!flutter/doc/**"
 
 concurrency:
   group: flutter-example-${{ github.ref }}
@@ -72,8 +95,20 @@ jobs:
         if: matrix.platform == 'ios' || matrix.platform == 'macos'
         run: |
           flutter config --no-analytics
-          flutter config --no-enable-swift-package-manager
+          flutter config --enable-swift-package-manager
           sudo xcodebuild -license accept 2>/dev/null || true
+
+      - name: Cache CocoaPods
+        if: matrix.platform == 'ios' || matrix.platform == 'macos'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cocoapods/repos
+            flutter/example/ios/Pods
+            flutter/example/macos/Pods
+          key: ${{ runner.os }}-pods-${{ matrix.platform }}-${{ hashFiles('flutter/example/ios/Podfile.lock', 'flutter/example/macos/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-${{ matrix.platform }}-
 
       - name: Configure Linux dependencies
         if: matrix.platform == 'linux'
@@ -91,8 +126,8 @@ jobs:
         working-directory: flutter/example
         run: |
           flutter clean
-          rm -rf ios/Pods ios/Podfile.lock ios/Flutter/ephemeral
-          rm -rf macos/Pods macos/Podfile.lock macos/Flutter/ephemeral
+          rm -rf ios/Flutter/ephemeral
+          rm -rf macos/Flutter/ephemeral
 
       - name: Get Flutter dependencies
         working-directory: flutter/example
