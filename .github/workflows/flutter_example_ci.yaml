@@ -6,12 +6,12 @@ on:
       - main
       - dev
     paths:
-      - 'flutter/example/**'
-      - '.github/workflows/flutter_example_ci.yaml'
+      - "flutter/example/**"
+      - ".github/workflows/flutter_example_ci.yaml"
   pull_request:
     paths:
-      - 'flutter/example/**'
-      - '.github/workflows/flutter_example_ci.yaml'
+      - "flutter/example/**"
+      - ".github/workflows/flutter_example_ci.yaml"
 
 concurrency:
   group: flutter-example-${{ github.ref }}
@@ -53,8 +53,8 @@ jobs:
       - name: Clone Flutter SDK
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.4'
-          channel: 'stable'
+          flutter-version: "3.44.0"
+          channel: "stable"
           cache: true
 
       - name: Set path for WSL builds
@@ -143,8 +143,8 @@ jobs:
       - name: Clone Flutter SDK
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.4'
-          channel: 'stable'
+          flutter-version: "3.44.0"
+          channel: "stable"
           cache: true
 
       - name: Install dependencies
