@@ -67,7 +67,7 @@ jobs:
           - platform: macos
             os: macos-latest
             artifact_name: build/macos/Build/Products/Debug
-            build_command: flutter build macos --debug --config-only --verbose
+            build_command: flutter build macos --debug --config-only # cannot built on macos without code signing - fallback to config-only
 
     steps:
       - name: Checkout repository
@@ -133,36 +133,8 @@ jobs:
           security set-keychain-settings -lut 21600 ~/Library/Keychains/login.keychain
 
       - name: Build ${{ matrix.platform }}
-        if: matrix.platform != 'macos'
         working-directory: flutter/example
         run: ${{ matrix.build_command }}
-
-      - name: Prepare macOS build
-        if: matrix.platform == 'macos'
-        working-directory: flutter/example
-        run: ${{ matrix.build_command }}
-
-      - name: Build macOS unsigned
-        if: matrix.platform == 'macos'
-        working-directory: flutter/example/macos
-        run: |
-          /usr/bin/env xcrun xcodebuild \
-            -workspace "$GITHUB_WORKSPACE/flutter/example/macos/Runner.xcworkspace" \
-            -scheme Runner \
-            -configuration Debug \
-            -derivedDataPath "$GITHUB_WORKSPACE/flutter/example/build/macos" \
-            -destination 'platform=macOS,arch=arm64' \
-            OBJROOT="$GITHUB_WORKSPACE/flutter/example/build/macos/Build/Intermediates.noindex" \
-            SYMROOT="$GITHUB_WORKSPACE/flutter/example/build/macos/Build/Products" \
-            VERBOSE_SCRIPT_LOGGING=YES \
-            COMPILER_INDEX_STORE_ENABLE=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY="" \
-            EXPANDED_CODE_SIGN_IDENTITY="" \
-            EXPANDED_CODE_SIGN_IDENTITY_NAME="" \
-            DEVELOPMENT_TEAM="" \
-            build
 
       - name: Upload artifacts
         if: matrix.platform == 'android'
