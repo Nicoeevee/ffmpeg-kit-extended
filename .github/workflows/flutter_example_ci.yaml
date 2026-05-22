@@ -67,7 +67,7 @@ jobs:
           - platform: macos
             os: macos-latest
             artifact_name: build/macos/Build/Products/Debug
-            build_command: flutter build macos --debug --config-only # cannot built on macos without code signing - fallback to config-only
+            build_command: flutter build macos --debug
 
     steps:
       - name: Checkout repository
