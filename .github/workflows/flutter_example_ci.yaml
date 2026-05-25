@@ -50,7 +50,7 @@ jobs:
         include:
           - platform: android
             os: ubuntu-latest
-            artifact_name: app-release.apk
+            artifact_name: app-debug.apk
             build_command: flutter build apk --debug
           - platform: ios
             os: macos-latest
