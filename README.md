@@ -26,6 +26,7 @@
 - **Callback Support**: detailed hooks for logs, statistics, and session completion.
 - **Session Management**: Full control over execution lifecycle (start, cancel, list).
 - **Extensible**: Designed to allow custom native library loading and configuration.
+- **Full package Introspection API**: Get detailed information about the package, including version, build date, and available muxers, demuxers, encoders, decoders, filters, etc.
 - **Deploy Custom Builds**: You can deploy custom builds of ffmpeg-kit-extended. See: <https://github.com/akashskypatel/ffmpeg-kit-builders>
 
 ### Platform Support

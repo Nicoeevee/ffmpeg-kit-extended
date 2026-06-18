@@ -1,5 +1,9 @@
 # FFmpegKit Extended Flutter Plugin CHANGELOG
 
+## Version 0.5.8
+
+- **Android** Fix Android dummy library to force C++ linking to 16kb page size instead of 4kb.
+
 ## Version 0.5.7
 
 - **iOS**: Fix iOS-Simulator vs device build hook slice selection.

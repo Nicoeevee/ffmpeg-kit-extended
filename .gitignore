@@ -110,11 +110,8 @@ app.*.symbols
 !/dev/ci/**/Gemfile.lock
 
 entities.json
-<<<<<<< Updated upstream
-mempalace.yaml
-=======
 mempalace.yaml
 **/.build/*
 FlutterFramework
->>>>>>> Stashed changes
 .aider*
+.devin/
