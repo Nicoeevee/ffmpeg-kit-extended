@@ -14,7 +14,7 @@
 #include <cstring>
 #include <mutex>
 
-// ─── FFmpegKit ABI (runtime-resolved) ────────────────────────────────────────
+// --- FFmpegKit ABI (runtime-resolved) ----------------------------------------
 // Resolve the frame-callback symbols at runtime via GetProcAddress so that the
 // plugin DLL has no link-time dependency on the libffmpegkit.dll import library
 // for these symbols.  The DLL is already loaded in the process by the time any
@@ -66,7 +66,7 @@ static void ResolveFFplayProcs() {
 
       char msg[512];
       ::snprintf(msg, sizeof(msg),
-                 "[ffmpegkit_plugin] symbol probe — "
+                 "[ffmpegkit_plugin] symbol probe - "
                  "register_frame_callback: %s  "
                  "unregister_frame_callback: %s  "
                  "session_get_video_width: %s  "
@@ -99,7 +99,7 @@ static void ffplay_kit_unregister_frame_callback() {
 
 namespace ffmpeg_kit_extended_flutter {
 
-// ─── Frame callback (FFplay background thread) ────────────────────────────────
+// --- Frame callback (FFplay background thread) --------------------------------
 
 static void OnFrameCallback(void* userdata, const uint8_t* pixels, int width,
                              int height, int linesize, const char* pixel_format) {
@@ -125,14 +125,14 @@ static void OnFrameCallback(void* userdata, const uint8_t* pixels, int width,
     }
     state->width = static_cast<uint32_t>(width);
     state->height = static_cast<uint32_t>(height);
-    // Swap write_buf ↔ read_buf so the render callback always gets the latest
+    // Swap write_buf - read_buf so the render callback always gets the latest
     // complete frame without blocking the decoder thread.
     std::swap(state->write_buf, state->read_buf);
     state->texture_registrar->MarkTextureFrameAvailable(state->texture_id);
   }
 }
 
-// ─── CopyPixelBuffer callback (Flutter render thread) ────────────────────────
+// --- CopyPixelBuffer callback (Flutter render thread) ------------------------
 
 static const FlutterDesktopPixelBuffer* CopyPixelBuffer(size_t /*width*/,
                                                          size_t /*height*/,
@@ -153,7 +153,7 @@ static const FlutterDesktopPixelBuffer* CopyPixelBuffer(size_t /*width*/,
   return &state->pixel_buffer;
 }
 
-// ─── Plugin implementation ────────────────────────────────────────────────────
+// --- Plugin implementation ----------------------------------------------------
 
 // static
 void FfmpegKitExtendedFlutterPlugin::RegisterWithRegistrar(
@@ -212,7 +212,7 @@ void FfmpegKitExtendedFlutterPlugin::HandleCreateTexture(
   state->texture_id =
       texture_registrar_->RegisterTexture(state->texture_variant.get());
 
-  // Register frame callback — decoded frames will now flow into this texture.
+  // Register frame callback - decoded frames will now flow into this texture.
   ffplay_kit_register_frame_callback(OnFrameCallback, state_ptr);
 
   texture_state_ = std::move(state);
