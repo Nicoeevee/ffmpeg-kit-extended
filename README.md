@@ -8,6 +8,14 @@
 
 </div>
 
+## Translations
+
+<div align="center">
+
+[English](README.md) | [Español](flutter/doc/README.es.md) | [简体中文](flutter/doc/README.zh-CN.md) | [हिन्दी](flutter/doc/README.hi.md) | [العربية](flutter/doc/README.ar.md) | [Français](flutter/doc/README.fr.md) | [Português (Brasil)](flutter/doc/README.pt-BR.md) | [日本語](flutter/doc/README.ja.md)
+
+</div>
+
 `ffmpeg-kit-extended` is a comprehensive Flutter plugin for executing `FFmpeg`, `FFprobe`, and `FFplay` `8.1.2 API` commands on `Android`, `iOS`, `macOS`, `Linux`, and `Windows`. It leverages Dart `FFI` to interact directly with native FFmpeg libraries, providing high performance, flexibility, and complete video playback capabilities.
 
 If you like the project and are using it in your app give it a ⭐ on [ffmpeg-kit-builders](https://github.com/akashskypatel/ffmpeg-kit-builders) and [ffmpeg-kit-extended](https://github.com/akashskypatel/ffmpeg-kit-extended), and a 👍 on [pub.dev](https://pub.dev/packages/ffmpeg_kit_extended_flutter). It helps a lot 🙏! Happy coding 🚀!
@@ -150,13 +158,16 @@ You will have to update your app's minimum requirements on your own to match the
 | AI*       |      |       |       |                |      |
 | HTTPS     | *    | x     | x     | x              | x    |
 | Platform* | x    | x     | x     | x              | x    |
+| Other*    |      |       |       |                | x    |
 
 1. AI features are not supported on all platforms. You must deploy your own custom build of ffmpeg-kit-extended to enable certain AI features.
    - See [Supported External Libraries](https://github.com/akashskypatel/ffmpeg-kit-builders?tab=readme-ov-file#supported-external-libraries) for more information.
 
-3. Platform features are built-in platform libraries that FFmpeg support like AVFounation, VideoToolbox, etc. on apple platforms or DirectX, MediaFoundation on Windows.
+2. Platform features are built-in platform libraries that FFmpeg support like AVFounation, VideoToolbox, etc. on apple platforms or DirectX, MediaFoundation on Windows.
 
-4. HTTPS features are enabled by default for Platforms that have built-in HTTPS support like Windows or Apple. For Linux and Android OpenSSL is enabled by default.
+3. HTTPS features are enabled by default for Platforms that have built-in HTTPS support like Windows or Apple. For Linux and Android OpenSSL is enabled by default.
+
+4. Other features are additional features that are not covered by the above categories. See [Supported External Libraries](https://github.com/akashskypatel/ffmpeg-kit-builders?tab=readme-ov-file#supported-external-libraries) for more information.
 
 ## 3. Usage
 
