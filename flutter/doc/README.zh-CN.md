@@ -74,14 +74,14 @@ flutter pub add ffmpeg_kit_extended_flutter
 
 ```yaml
 ffmpeg_kit_extended_config:
-  type: "base" # pre-bundled builds: debug, base, full, audio, video, video_hw
-  gpl: true # enable to include GPL libraries
-  small: true # enable to use smaller builds
-  # == OR ==
+  type: "base" # 预打包构建：debug, base, full, audio, video, video_hw
+  gpl: true # 启用以包含 GPL 库
+  small: true # 启用以使用更小的构建
+  # == 或 ==
   # -------------------------------------------------------------
-  # You can specify remote or local path to libffmpegkit libraries for each platform
-  # This allows you to deploy custom builds of libffmpegkit.
-  # See: https://github.com/akashskypatel/ffmpeg-kit-builders
+  # 你可以为每个平台指定 libffmpegkit 库的远程或本地路径
+  # 这允许你部署 libffmpegkit 的自定义构建。
+  # 参见：https://github.com/akashskypatel/ffmpeg-kit-builders
   # -------------------------------------------------------------
   # windows: "path/to/ffmpeg-kit/libraries"
   # ios: "https://path/to/bundle.xcframework.zip"
@@ -219,7 +219,7 @@ FFprobeKit.getMediaInformationAsync('path/to/video.mp4', onComplete: (session) {
 ```dart
 FFmpegKit.executeAsync(
   '-i input.mp4 output.mkv',
-  onComplete: (session) { /* Complete Callback */ },
+  onComplete: (session) { /* 完成回调 */ },
   onLog: (log) {
     print("Log: ${log.message}");
   },
@@ -234,15 +234,15 @@ FFmpegKit.executeAsync(
 所有执行都会返回一个 `Session` 对象，可用于控制任务：
 
 ```dart
-// Cancel a specific session
+// 取消指定会话
 FFmpegKit.cancel(session);
 
-// Cancel all active sessions
+// 取消所有活动会话
 FFmpegKitExtended.cancelAllSessions();
 
-// List all sessions
+// 列出所有会话
 final sessions = FFmpegKitExtended.getSessions();
-// OR list only FFmpeg sessions
+// 或仅列出 FFmpeg 会话
 final ffmpegSessions = FFmpegKit.getFFmpegSessions();
 ```
 
@@ -274,12 +274,12 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   }
 
   Future<void> _startPlayback(String filePath) async {
-    // Create surface before starting playback
+    // 在开始播放前创建 surface
     _surface = await FFplaySurface.create();
 
     final session = await FFplayKit.executeAsync('-i "$filePath"');
 
-    // Listen for video dimensions
+    // 监听视频尺寸
     session.videoSizeStream.listen((size) {
       final (width, height) = size;
       if (mounted && width > 0 && height > 0) {
@@ -291,7 +291,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       }
     });
 
-    // Listen for position updates
+    // 监听播放位置更新
     session.positionStream.listen((position) {
       if (mounted) {
         setState(() => _playbackPosition = position);
@@ -303,7 +303,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Video display (only when video frames are available)
+        // 视频显示（仅在视频帧可用时显示）
         if (_hasVideo && _surface != null)
           SizedBox(
             width: _videoWidth.toDouble(),
@@ -311,7 +311,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
             child: _surface!.toWidget(),
           ),
 
-        // Playback controls
+        // 播放控件
         Row(
           children: [
             IconButton(
@@ -348,22 +348,22 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
 #### 高级功能
 
 ```dart
-// Get session-specific properties
+// 获取会话特定属性
 final session = await FFplayKit.executeAsync('-i video.mp4');
 
-// Video dimensions (available when first frame is decoded)
+// 视频尺寸（解码第一帧后可用）
 final width = session.getVideoWidth();
 final height = session.getVideoHeight();
 
-// Real-time streams
+// 实时数据流
 session.positionStream.listen((pos) => print('Position: ${pos}s'));
 session.videoSizeStream.listen((size) => print('Size: ${size}'));
 
-// Volume control
-session.setVolume(0.8); // 0.0 to 1.0
+// 音量控制
+session.setVolume(0.8); // 从 0.0 到 1.0
 print('Volume: ${session.getVolume()}');
 
-// Session state
+// 会话状态
 print('Playing: ${session.isPlaying()}');
 print('Paused: ${session.isPaused()}');
 ```

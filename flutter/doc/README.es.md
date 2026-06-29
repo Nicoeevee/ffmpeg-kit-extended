@@ -74,14 +74,14 @@ flutter pub add ffmpeg_kit_extended_flutter
 
 ```yaml
 ffmpeg_kit_extended_config:
-  type: "base" # pre-bundled builds: debug, base, full, audio, video, video_hw
-  gpl: true # enable to include GPL libraries
-  small: true # enable to use smaller builds
-  # == OR ==
+  type: "base" # compilaciones preempaquetadas: debug, base, full, audio, video, video_hw
+  gpl: true # actívalo para incluir bibliotecas GPL
+  small: true # actívalo para usar compilaciones más pequeñas
+  # == O ==
   # -------------------------------------------------------------
-  # You can specify remote or local path to libffmpegkit libraries for each platform
-  # This allows you to deploy custom builds of libffmpegkit.
-  # See: https://github.com/akashskypatel/ffmpeg-kit-builders
+  # Puedes especificar una ruta remota o local a las bibliotecas libffmpegkit para cada plataforma
+  # Esto te permite desplegar compilaciones personalizadas de libffmpegkit.
+  # Consulta: https://github.com/akashskypatel/ffmpeg-kit-builders
   # -------------------------------------------------------------
   # windows: "path/to/ffmpeg-kit/libraries"
   # ios: "https://path/to/bundle.xcframework.zip"
@@ -219,7 +219,7 @@ Puedes registrar callbacks de logs y estadísticas para mejorar el monitoreo:
 ```dart
 FFmpegKit.executeAsync(
   '-i input.mp4 output.mkv',
-  onComplete: (session) { /* Complete Callback */ },
+  onComplete: (session) { /* Callback de finalización */ },
   onLog: (log) {
     print("Log: ${log.message}");
   },
@@ -234,15 +234,15 @@ FFmpegKit.executeAsync(
 Todas las ejecuciones devuelven un objeto `Session` que permite controlar la tarea:
 
 ```dart
-// Cancel a specific session
+// Cancelar una sesión específica
 FFmpegKit.cancel(session);
 
-// Cancel all active sessions
+// Cancelar todas las sesiones activas
 FFmpegKitExtended.cancelAllSessions();
 
-// List all sessions
+// Listar todas las sesiones
 final sessions = FFmpegKitExtended.getSessions();
-// OR list only FFmpeg sessions
+// O listar solo las sesiones de FFmpeg
 final ffmpegSessions = FFmpegKit.getFFmpegSessions();
 ```
 
@@ -274,12 +274,12 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   }
 
   Future<void> _startPlayback(String filePath) async {
-    // Create surface before starting playback
+    // Crear la superficie antes de iniciar la reproducción
     _surface = await FFplaySurface.create();
 
     final session = await FFplayKit.executeAsync('-i "$filePath"');
 
-    // Listen for video dimensions
+    // Escuchar las dimensiones del video
     session.videoSizeStream.listen((size) {
       final (width, height) = size;
       if (mounted && width > 0 && height > 0) {
@@ -291,7 +291,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
       }
     });
 
-    // Listen for position updates
+    // Escuchar las actualizaciones de posición
     session.positionStream.listen((position) {
       if (mounted) {
         setState(() => _playbackPosition = position);
@@ -303,7 +303,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        // Video display (only when video frames are available)
+        // Visualización de video (solo cuando hay fotogramas disponibles)
         if (_hasVideo && _surface != null)
           SizedBox(
             width: _videoWidth.toDouble(),
@@ -311,7 +311,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
             child: _surface!.toWidget(),
           ),
 
-        // Playback controls
+        // Controles de reproducción
         Row(
           children: [
             IconButton(
@@ -348,22 +348,22 @@ La clase `FFplaySurface` maneja automáticamente las diferencias entre plataform
 #### Funciones avanzadas
 
 ```dart
-// Get session-specific properties
+// Obtener propiedades específicas de la sesión
 final session = await FFplayKit.executeAsync('-i video.mp4');
 
-// Video dimensions (available when first frame is decoded)
+// Dimensiones del video (disponibles cuando se decodifica el primer fotograma)
 final width = session.getVideoWidth();
 final height = session.getVideoHeight();
 
-// Real-time streams
+// Flujos en tiempo real
 session.positionStream.listen((pos) => print('Position: ${pos}s'));
 session.videoSizeStream.listen((size) => print('Size: ${size}'));
 
-// Volume control
-session.setVolume(0.8); // 0.0 to 1.0
+// Control de volumen
+session.setVolume(0.8); // de 0.0 a 1.0
 print('Volume: ${session.getVolume()}');
 
-// Session state
+// Estado de la sesión
 print('Playing: ${session.isPlaying()}');
 print('Paused: ${session.isPaused()}');
 ```
